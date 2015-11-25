@@ -1,10 +1,13 @@
 FROM ubuntu:15.04
 MAINTAINER Etki etki@etki.name
 
+EXPOSE 80
+
 RUN apt-get update -yq && apt-get upgrade -yq \
     && apt-get install -yq gcc make wget zlib1g-dev libpcre3-dev libgeoip-dev
 
 WORKDIR /tmp
+
 RUN wget -O /tmp/nginx.tar.gz http://nginx.org/download/nginx-1.9.5.tar.gz \
     && wget -O /tmp/nginx.echo.tar.gz https://github.com/openresty/echo-nginx-module/archive/v0.58.tar.gz \
     && wget -O /tmp/luajit.tar.gz http://luajit.org/download/LuaJIT-2.0.4.tar.gz \
@@ -21,7 +24,8 @@ RUN wget -O /tmp/nginx.tar.gz http://nginx.org/download/nginx-1.9.5.tar.gz \
     && gunzip *.dat.gz \
     && rm *.gz \
     && mkdir -p /usr/share/geoip \
-    && for i in *.dat; do mv $i `echo /usr/share/geoip/$i | tr [:upper:] [:lower:]`; done
+    && for i in *.dat; do mv $i `echo /usr/share/geoip/$i | tr [:upper:] [:lower:]`; done \
+    && mkdir -p /var/log/nginx
 
 RUN make --directory=/tmp/LuaJIT-2.0.4 \
     && make install --directory=/tmp/LuaJIT-2.0.4 \
@@ -38,11 +42,13 @@ RUN make --directory=/tmp/lua-iconv-7 LUABIN=luajit LUAPKG=5.1 CFLAGS="-I$LUA_IN
 && make install --directory=/tmp/lua-iconv-7
 
 WORKDIR /tmp/nginx-1.9.5
+
 RUN /tmp/nginx-1.9.5/configure --with-http_geoip_module \
-    --with-http_realip_module \
+    --with-http_realip_module --with-ipv6 \
     --add-module=/tmp/ngx_devel_kit-0.2.19 \
     --add-module=/tmp/lua-nginx-module-0.9.19 \
     --add-module=/tmp/headers-more-nginx-module-0.28 \
+    --add-module=/tmp/echo-nginx-module-0.58 \
     --with-ld-opt="-Wl,-rpath,$LUAJIT_LIB" \
     --sbin-path=/usr/sbin/nginx \
     --conf-path=/etc/nginx/nginx.conf \
@@ -53,6 +59,7 @@ RUN mkdir -p /etc/nginx/sites-enabled && cp /tmp/telize-1.04/*.conf /etc/nginx \
     && cp /tmp/telize-1.04/telize /etc/nginx/sites-enabled/telize.conf
 
 ADD nginx.conf /etc/nginx
+RUN nginx -t
 
 RUN rm -rf /tmp/LuaJIT* /tmp/echo-nginx-module* /tmp/lua-nginx-module* \
     /tmp/nginx* /tmp/ngx_devel_kit* /tmp/headers-more-nginx-module* \
