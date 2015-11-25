@@ -59,7 +59,7 @@ RUN /tmp/nginx-1.9.5/configure --with-http_geoip_module \
 RUN mkdir -p /etc/nginx/sites-enabled && cp /tmp/telize-1.04/*.conf /etc/nginx \
     && cp /tmp/telize-1.04/telize /etc/nginx/sites-enabled/telize.conf
 
-ADD nginx.conf /etc/nginx
+ADD nginx.conf /etc/nginx/
 RUN nginx -t
 
 RUN rm -rf /tmp/LuaJIT* /tmp/echo-nginx-module* /tmp/lua-nginx-module* \
