@@ -37,7 +37,9 @@ strictly to stderr.
 
 - [Telize][telize-license]
 - [Docker][docker-license]
+- [Maxmind geoip databases][maxmind-license]
 
   [telize]: http://www.telize.com/
   [telize-license]: https://github.com/fcambus/telize/blob/master/LICENSE
   [docker-license]: https://github.com/docker/docker/blob/master/LICENSE
+  [maxmind-license]: http://dev.maxmind.com/geoip/legacy/geolite/#License
